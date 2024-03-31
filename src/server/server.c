@@ -284,7 +284,7 @@ void server_to_string(const server* sv)
     }
 }
 
-const c_vector* server_get_client(const server* sv)
+const c_vector* server_get_client_list(const server* sv)
 {
     if(check_null_pointer(sv, "server"))return NULL;
 

@@ -56,6 +56,7 @@ int main()
     pthread_attr_t inf;
     pthread_attr_init(&inf);
     pthread_create(&p, &inf, input_manager, new_server);
+    const c_vector* cls = server_get_client_list(new_server);
     
     pthread_join(p, NULL);
     server_wait(new_server);

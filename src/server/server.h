@@ -15,4 +15,4 @@ int server_recv(const server* sv, unsigned char* buffer, unsigned int* buffer_si
 unsigned long server_sizeof();
 const char* server_addr_str(const server* sv);
 void server_to_string(const server* sv);
-const c_vector* server_get_client(const server* sv);
+const c_vector* server_get_client_list(const server* sv);
