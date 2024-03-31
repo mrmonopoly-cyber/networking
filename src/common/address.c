@@ -50,7 +50,7 @@ int address_init(address** addr, const char* ip_addr, const unsigned short port)
         dig_counter++;
     }
     
-    unsigned short* cursor= (*addr)->addr_sectors;
+    unsigned char* cursor= (*addr)->addr_sectors;
     int temp = 0;
     for (int i=0; i<IP_ADDR_SECTORS; i++) {
         temp = atoi(&sectors[i*SECTOR_SIZE]);

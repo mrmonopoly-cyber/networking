@@ -6,7 +6,7 @@
 
 typedef struct address{//0.0.0.0 - 255.255.255.255
     char _addr_str[IP_ADDR_SECTORS*SECTOR_SIZE];
-    unsigned short addr_sectors[IP_ADDR_SECTORS];
+    unsigned char addr_sectors[IP_ADDR_SECTORS];
     unsigned short port;
 }address;
 
