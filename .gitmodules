@@ -1,0 +1,3 @@
+[submodule "src/common/c_vector"]
+	path = src/common/c_vector
+	url = https://github.com/mrmonopoly-cyber/c_vector.git

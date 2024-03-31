@@ -1,4 +1,4 @@
-#include "net_node.h"
+#include "../common/net_node.h"
 
 typedef struct server client;
 

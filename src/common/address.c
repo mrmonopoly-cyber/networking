@@ -1,4 +1,4 @@
-#include "networking.h"
+#include "net_node.h"
 
 #include <errno.h>
 #include <stdio.h>

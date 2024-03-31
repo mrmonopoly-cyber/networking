@@ -1,5 +1,4 @@
-#include "net_node.h"
-#include "networking.h"
+#include "server.h"
 
 #include <pthread.h>
 #include <signal.h>
@@ -12,7 +11,8 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-#include "../c_vector/c_vector.h"
+#include "../common/net_node.h"
+#include "../common/c_vector/c_vector.h"
 
 typedef struct server_internal{
     net_node _common;
