@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include <netinet/in.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,7 +13,7 @@
 #include <unistd.h>
 
 #include "../common/net_node.h"
-#include "../common/c_vector/c_vector.h"
+#include "../../lib/c_vector/c_vector.h"
 
 typedef struct server_internal{
     net_node _common;
@@ -112,7 +113,7 @@ static void close_client_connection(void *ele)
 }
 
 //public
-int server_init(server** sv, const address* addr, const unsigned int sv_capacity)
+uint8_t server_init(server** sv, const address* addr, const uint16_t sv_capacity)
 {
     server_internal** sv_int = (server_internal** )sv;
     unsigned int alloc = 0;
@@ -175,7 +176,7 @@ exit:
     return EXIT_FAILURE;
 }
 
-int server_start(server* sv)
+uint8_t server_start(server* sv)
 {
     server_internal* sv_int = (server_internal *) sv;
     pthread_attr_t t_args;
@@ -195,7 +196,8 @@ int server_start(server* sv)
 
     return EXIT_SUCCESS;
 }
-int server_stop(const server* sv)
+
+uint8_t server_stop(const server* sv)
 {
     server_internal* sv_int = (server_internal *) sv;
     if (!sv_int->_sv_thread) {
@@ -206,7 +208,7 @@ int server_stop(const server* sv)
     return EXIT_SUCCESS;
 }
 
-int server_kill(const server* sv)
+uint8_t server_kill(const server* sv)
 {
     server_internal* sv_int = (server_internal* ) sv;
     if(check_null_pointer(sv_int, "server")) return EXIT_FAILURE;
@@ -245,9 +247,9 @@ void server_wait(const server* sv)
     return;
 }
 
-int server_send(const server* sv, const address* addr);
-int server_recv(const server* sv, unsigned char* buffer, unsigned int* buffer_size);
-int server_free(server* sv)
+uint8_t server_send(const server* sv, const address* addr, const void* data, const uint16_t data_amount);
+uint8_t server_recv(const server* sv, void* buffer, uint16_t* buffer_size);
+uint8_t server_free(server* sv)
 {
     server_internal* sv_int = (server_internal* )sv;
     server_stop(sv);

@@ -1,3 +1,9 @@
 [submodule "src/common/c_vector"]
 	path = src/common/c_vector
 	url = https://github.com/mrmonopoly-cyber/c_vector.git
+[submodule "src/lib/c_vector"]
+	path = src/lib/c_vector
+	url = https://github.com/mrmonopoly-cyber/c_vector.git
+[submodule "lib/c_vector"]
+	path = lib/c_vector
+	url = https://github.com/mrmonopoly-cyber/c_vector.git

@@ -2,7 +2,7 @@
 #define IP_ADDR_SECTORS 4
 #define SECTOR_SIZE 4
 
-#include "c_vector/c_vector.h"
+#include "../../lib/c_vector/c_vector.h"
 
 typedef struct address{//0.0.0.0 - 255.255.255.255
     char _addr_str[IP_ADDR_SECTORS*SECTOR_SIZE];

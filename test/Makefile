@@ -1,6 +1,6 @@
 C_FLAGS = -Wall -Wextra -g -fsanitize=address
 
-c_vector.c = ../src/common/c_vector/c_vector.c
+c_vector.c = ../lib/c_vector/c_vector.c
 server.c = ../src/server/server.c
 client.c = ../src/client/client.c
 address.c = ../src/common/address.c
