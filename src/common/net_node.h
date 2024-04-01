@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 #define IP_ADDR_SECTORS 4
 #define SECTOR_SIZE 4
 
@@ -25,4 +26,4 @@ int address_init(address** addr, const char* ip_addr, const unsigned short port)
 
 //net_node
 c_vector* net_node_vector_init(const unsigned int capacity);
-
+uint8_t net_node_send(const net_node* addr, const void* data, const uint16_t data_amount);

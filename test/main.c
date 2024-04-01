@@ -8,12 +8,14 @@ void*
 input_manager(void* args){
     server* sv = (server* ) args;
     
-    const address* new_client = NULL;
+    const net_node* new_client = NULL;
     char buffer[2] = {};
     printf("press any key to close the server\n");
 
+    char mex[] = "hello\n";
     new_client = server_async_wait_new_connection(sv);
-    printf("ip of new client %s\n", new_client->_addr_str);
+    printf("ip of new client %s\n", new_client->_addr._addr_str);
+    net_node_send(new_client, &mex, sizeof(mex));
     while (1) {
         fgets(buffer, sizeof(buffer), stdin);
         fflush(stdin);
@@ -60,7 +62,6 @@ int main()
     pthread_attr_t inf;
     pthread_attr_init(&inf);
     pthread_create(&p, &inf, input_manager, new_server);
-    const c_vector* cls = server_get_client_list(new_server);
     
     pthread_join(p, NULL);
     server_wait(new_server);

@@ -33,7 +33,6 @@ typedef struct connection{
     pthread_t _thr;
 }connection;
 
-
 static inline int
 check_null_pointer(const void* ptr, const char* ptr_name){
     if (!ptr) {
@@ -59,11 +58,10 @@ cmp_socket(void* sock1, void* sock2){
 static inline int
 cmp_conn(const void* conn1, const void* conn2){
     connection* c1 = (connection *)conn1;
-    connection* c2 = (connection *)conn2;
+    address* c2 = (address*)conn2;
 
-    return c1->_conn_sock == c2->_conn_sock && 
-        c1->_conn_addr.addr_sectors == c2->_conn_addr.addr_sectors &&
-        c1->_conn_addr.port == c2->_conn_addr.port;
+    return !strcmp(c1->_conn_addr._addr_str, c2->_addr_str) &&
+        c1->_conn_addr.port == c2->port;
 }
 
 static inline void
@@ -265,11 +263,6 @@ void server_wait(const server* sv)
     return;
 }
 
-uint8_t server_send(const server* sv, const address* addr, const void* data, const uint16_t data_amount)
-{
-    NOT_IMPLEMENTED;
-    return EXIT_SUCCESS;
-}
 
 uint8_t server_recv(const server* sv, void* buffer, uint16_t* buffer_size)
 {
@@ -331,7 +324,7 @@ const c_vector* server_get_client_list(const server* sv)
     return result;
 }
 
-const address* server_async_wait_new_connection(const server* sv)
+const net_node* server_async_wait_new_connection(const server* sv)
 {
     server_internal* sv_int = CONCRETE_SERVER(sv);
     void* res = NULL;
