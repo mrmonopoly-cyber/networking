@@ -341,7 +341,6 @@ const address* server_async_wait_new_connection(const server* sv)
     
     }
 
-    fprintf(stderr, "found it\n");
     c_queue_pop(&sv_int->_new_connection, &res);
     return res;
 }
