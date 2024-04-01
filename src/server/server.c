@@ -15,6 +15,9 @@
 #include "../common/net_node.h"
 #include "../../lib/c_vector/c_vector.h"
 
+#define CONCRETE_SERVER(SV) (server_internal* ) SV
+#define NOT_IMPLEMENTED perror("not implemented")
+
 typedef struct server_internal{
     net_node _common;
     c_vector* _connection_vec;
@@ -63,14 +66,14 @@ cmp_conn(const void* conn1, const void* conn2){
 
 static inline void
 print_fun(const void* e){
-    server_internal* ser = (server_internal *) e;
+    server_internal* ser = CONCRETE_SERVER(e);
     printf("%s", ser->_common._addr._addr_str);
 }
 
 static void* 
 new_server_thread(void* args)
 {
-    server_internal* sv_int = (server_internal* )args;
+    server_internal* sv_int = CONCRETE_SERVER(args);
     unsigned int _my_socket = sv_int->_common._my_socket;
     struct sockaddr_in client_addr;
     unsigned int client_addr_size = sizeof(client_addr);
@@ -188,7 +191,7 @@ exit:
 
 uint8_t server_start(server* sv)
 {
-    server_internal* sv_int = (server_internal *) sv;
+    server_internal* sv_int = CONCRETE_SERVER(sv);
     pthread_attr_t t_args;
     if (!sv_int->_sv_thread) {
         pthread_attr_init(&t_args);
@@ -209,7 +212,7 @@ uint8_t server_start(server* sv)
 
 uint8_t server_stop(const server* sv)
 {
-    server_internal* sv_int = (server_internal *) sv;
+    server_internal* sv_int = CONCRETE_SERVER(sv);
     if (!sv_int->_sv_thread) {
         fprintf(stderr, "ERROR: failed to stop the server, server has not yet started\n");
         return EXIT_FAILURE;
@@ -220,7 +223,7 @@ uint8_t server_stop(const server* sv)
 
 uint8_t server_kill(const server* sv)
 {
-    server_internal* sv_int = (server_internal* ) sv;
+    server_internal* sv_int = CONCRETE_SERVER(sv);
     if(check_null_pointer(sv_int, "server")) return EXIT_FAILURE;
     
     if (!sv_int->_sv_thread) {
@@ -247,7 +250,7 @@ void server_wait(const server* sv)
 {
     if(check_null_pointer(sv, "server")) return;
     
-    server_internal* sv_int = (server_internal* ) sv;
+    server_internal* sv_int = CONCRETE_SERVER(sv);
     if (!sv_int->_sv_thread) {
         fprintf(stderr, "error server not started\n");
         return;
@@ -257,11 +260,21 @@ void server_wait(const server* sv)
     return;
 }
 
-uint8_t server_send(const server* sv, const address* addr, const void* data, const uint16_t data_amount);
-uint8_t server_recv(const server* sv, void* buffer, uint16_t* buffer_size);
+uint8_t server_send(const server* sv, const address* addr, const void* data, const uint16_t data_amount)
+{
+    NOT_IMPLEMENTED;
+    return EXIT_SUCCESS;
+}
+
+uint8_t server_recv(const server* sv, void* buffer, uint16_t* buffer_size)
+{
+    NOT_IMPLEMENTED;
+    return EXIT_SUCCESS;
+}
+
 uint8_t server_free(server* sv)
 {
-    server_internal* sv_int = (server_internal* )sv;
+    server_internal* sv_int = CONCRETE_SERVER(sv);
     server_stop(sv);
     c_vector_free(sv_int->_connection_vec);
     free(sv);
@@ -277,13 +290,13 @@ const char* server_addr_str(const server* sv){
     if(check_null_pointer(sv, "server")){
         return NULL;
     }
-    server_internal* sv_int = (server_internal* ) sv;
+    server_internal* sv_int = CONCRETE_SERVER(sv);
     return sv_int->_common._addr._addr_str;
 }
 
 void server_to_string(const server* sv)
 {
-    server_internal* sv_int = (server_internal* )sv;
+    server_internal* sv_int = CONCRETE_SERVER(sv);
     printf("common:\n");
     printf("socket: %d, address: %s\n",sv_int->_common._my_socket, sv_int->_common._addr._addr_str);
     printf("vector: ");
@@ -300,7 +313,7 @@ const c_vector* server_get_client_list(const server* sv)
 {
     if(check_null_pointer(sv, "server"))return NULL;
 
-    server_internal* sv_int = (server_internal* )sv;
+    server_internal* sv_int = CONCRETE_SERVER(sv);
     unsigned int clien_num = c_vector_length(sv_int->_connection_vec);
     c_vector* result = net_node_vector_init(clien_num);
     void* ele = NULL;
@@ -311,4 +324,11 @@ const c_vector* server_get_client_list(const server* sv)
     }
 
     return result;
+}
+
+const address* server_async_wait_new_connection(const server* sv)
+{
+    const server_internal* sv_int = CONCRETE_SERVER(sv);
+    NOT_IMPLEMENTED;
+    return NULL;
 }
