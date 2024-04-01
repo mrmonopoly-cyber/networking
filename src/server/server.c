@@ -14,11 +14,14 @@
 
 #include "../common/net_node.h"
 #include "../../lib/c_vector/c_vector.h"
+#include "../../lib/generic_tree_interface/src/rbt/rbt.h"
 
 typedef struct server_internal{
     net_node _common;
     c_vector* _connection_vec;
     pthread_t _sv_thread;
+    rbt* _connection_queue;
+    tree_operations* _queue_env;
     unsigned char listening:1;
 }server_internal;
 
@@ -41,6 +44,14 @@ check_null_pointer(const void* ptr, const char* ptr_name){
 static inline void
 free_connection(void* conn){
     free(conn);
+}
+
+static int 
+cmp_socket(void* sock1, void* sock2){
+    socket_t* sock1_t = (socket_t* )sock1;
+    socket_t* sock2_t = (socket_t* )sock2;
+
+    return sock1_t == sock2_t;
 }
 
 static inline int
@@ -98,22 +109,25 @@ new_server_thread(void* args)
             continue;
         }
 
-
+        RBT_insert(&sv_int->_connection_queue, &client_socket, sv_int->_queue_env)
     }
 
     sv_int->listening=0;
     return NULL;
 }
 
-static void close_client_connection(void *ele)
+static void 
+close_client_connection(void *ele)
 {
     if(check_null_pointer(ele, "connection")) return;
     connection* c = (connection* ) ele;
     close(c->_conn_sock);
 }
 
+
 //public
-uint8_t server_init(server** sv, const address* addr, const uint16_t sv_capacity)
+uint8_t 
+server_init(server** sv, const address* addr, const uint16_t sv_capacity)
 {
     server_internal** sv_int = (server_internal** )sv;
     unsigned int alloc = 0;
@@ -158,10 +172,13 @@ uint8_t server_init(server** sv, const address* addr, const uint16_t sv_capacity
         goto close_socket;
     }
 
+
+    (*sv_int)->_queue_env = RBT_environment(cmp_socket, NULL, NULL, NULL);
     (*sv_int)->_sv_thread=0;
     (*sv_int)->_common._my_socket=sv_socket;
     (*sv_int)->_connection_vec = vec_con;
     (*sv_int)->_sv_thread = 0;
+    (*sv_int)->_connection_queue = NULL;
     
     return EXIT_SUCCESS;
 

@@ -1,30 +1,17 @@
 C_FLAGS = -Wall -Wextra -g -fsanitize=address
 
-c_vector.c = ../lib/c_vector/c_vector.c
-server.c = ../src/server/server.c
-client.c = ../src/client/client.c
-address.c = ../src/common/address.c
-net_node.c = ../src/common/net_node.c
+NETWORKING_ROOT := ..
+
+include ../Makefile
+
+obj_file = main.c address.o server.o client.o net_node.o c_vector.o rbt.o tree_operations.o
 
 all: main
 
-main: main.c address.o server.o client.o c_vector.o net_node.o
-	gcc $(C_FLAGS) address.o net_node.o c_vector.o server.o client.o main.c -o main
+main:  $(obj_file)
+	gcc $(C_FLAGS) $(obj_file) -o main
 
-c_vector.o: $(c_vector.c)
-	gcc $(C_FLAGS) $(c_vector.c) -c
+test_clean: 
+	rm main 
 
-net_node.o: $(net_node.c)
-	gcc $(C_FLAGS) $(net_node.c) -c
-
-address.o: $(address.c)
-	gcc $(C_FLAGS) $(address.c) -c
-
-server.o: $(server.c)
-	gcc $(C_FLAGS) $(server.c) -c
-
-client.o: $(client.c)
-	gcc $(C_FLAGS) $(client.c) -c
-
-clean: 
-	rm main address.o server.o client.o c_vector.o net_node.o
+clean: test_clean
