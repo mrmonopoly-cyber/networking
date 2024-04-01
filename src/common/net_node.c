@@ -52,7 +52,11 @@ net_node_send(const net_node* node, const void* data, const uint16_t data_amount
     if(check_null_pointer(data, "data buffer")) return EXIT_FAILURE;
     if(!data_amount) return EXIT_SUCCESS;
     
+    char terminator = '\n';
+
     send(node->_my_socket, data, data_amount, 0);
+    send(node->_my_socket, &terminator, sizeof(terminator), 0);
+    
 
     return EXIT_SUCCESS;
 }
@@ -66,8 +70,10 @@ net_node_recv(const net_node* node, void* buffer, unsigned int buffer_size)
         fprintf(stderr, "ERROR: buffer dimension not sufficient, must be >0\n");
         return EXIT_FAILURE;
     }
-
+    char terminator = ' ';
+    
     recv(node->_my_socket, buffer, buffer_size, 0);
+    recv(node->_my_socket, &terminator, sizeof(terminator), 0);
 
     return EXIT_SUCCESS;
 }
