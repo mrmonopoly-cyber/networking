@@ -8,8 +8,12 @@ void*
 input_manager(void* args){
     server* sv = (server* ) args;
     
+    const address* new_client = NULL;
     char buffer[2] = {};
     printf("press any key to close the server\n");
+
+    new_client = server_async_wait_new_connection(sv);
+    printf("ip of new client %s\n", new_client->_addr_str);
     while (1) {
         fgets(buffer, sizeof(buffer), stdin);
         fflush(stdin);

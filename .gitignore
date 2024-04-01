@@ -7,3 +7,4 @@ bst.o
 btree.o
 rbt.o
 tree_operations.o
+c_queue.o

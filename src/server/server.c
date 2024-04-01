@@ -102,6 +102,7 @@ new_server_thread(void* args)
             close(client_socket);
             continue;
         }
+        printf("new client ip %s\n", client_addr_str);
         new_client._conn_sock = client_socket;
         address_init(&client_addr_imp, client_addr_str, client_addr.sin_port);
         const void* ele = c_vector_push(&sv_int->_connection_vec, &new_client);
@@ -110,7 +111,7 @@ new_server_thread(void* args)
             close(client_socket);
             continue;
         }
-        c_queue_push(&sv_int->_new_connection, &ele, sizeof(&ele));
+        c_queue_push(&sv_int->_new_connection, ele, c_vector_ele_size(sv_int->_connection_vec));
     }
 
     sv_int->listening=0;
@@ -332,7 +333,15 @@ const c_vector* server_get_client_list(const server* sv)
 
 const address* server_async_wait_new_connection(const server* sv)
 {
-    const server_internal* sv_int = CONCRETE_SERVER(sv);
-    NOT_IMPLEMENTED;
-    return NULL;
+    server_internal* sv_int = CONCRETE_SERVER(sv);
+    void* res = NULL;
+
+    fprintf(stderr, "This is temporal, right now it's not async it's a polling\n");
+    for (;c_queue_is_empty(sv_int->_new_connection);) {
+    
+    }
+
+    fprintf(stderr, "found it\n");
+    c_queue_pop(&sv_int->_new_connection, &res);
+    return res;
 }
