@@ -7,3 +7,6 @@
 [submodule "lib/c_vector"]
 	path = lib/c_vector
 	url = https://github.com/mrmonopoly-cyber/c_vector.git
+[submodule "lib/c_queue"]
+	path = lib/c_queue
+	url = https://github.com/mrmonopoly-cyber/c_queue.git
