@@ -13,9 +13,12 @@ input_manager(void* args){
     printf("press any key to close the server\n");
 
     char mex[] = "hello\n";
+    char mex_recv[1024] = {0};
     new_client = server_async_wait_new_connection(sv);
     printf("ip of new client %s\n", new_client->_addr._addr_str);
-    net_node_send(new_client, &mex, sizeof(mex));
+    // net_node_send(new_client, &mex, sizeof(mex));
+    net_node_recv(new_client, &mex_recv, sizeof(mex_recv));
+    printf("received message :%s\n", mex_recv);
     while (1) {
         fgets(buffer, sizeof(buffer), stdin);
         fflush(stdin);

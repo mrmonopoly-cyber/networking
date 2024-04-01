@@ -4,14 +4,17 @@ NETWORKING_ROOT := ..
 
 include $(NETWORKING_ROOT)/Makefile
 
-obj_file = main.c address.o server.o client.o net_node.o c_vector.o c_queue.o
+obj_file = address.o server.o client.o net_node.o c_vector.o c_queue.o
 
-all: main
+all: server client
 
-main:  $(obj_file)
-	gcc $(C_FLAGS) $(obj_file) -o main
+client:  $(obj_file) client_test.c
+	gcc $(C_FLAGS) $(obj_file) client_test.c -o client
+
+server:  $(obj_file) server_test.c
+	gcc $(C_FLAGS) $(obj_file) server_test.c -o server
 
 test_clean: 
-	rm main 
+	rm server client
 
 clean: test_clean

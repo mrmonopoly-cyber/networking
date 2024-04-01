@@ -6,3 +6,5 @@ main
 server.o
 net_node.o
 c_queue.o
+server
+client
