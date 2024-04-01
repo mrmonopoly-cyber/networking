@@ -14,6 +14,7 @@
 
 #include "../common/net_node.h"
 #include "../../lib/c_vector/c_vector.h"
+#include "../../lib/c_queue/c_queue.h"
 
 #define CONCRETE_SERVER(SV) (server_internal* ) SV
 #define NOT_IMPLEMENTED perror("not implemented")
@@ -21,6 +22,7 @@
 typedef struct server_internal{
     net_node _common;
     c_vector* _connection_vec;
+    c_queue* _new_connection;
     pthread_t _sv_thread;
     unsigned char listening:1;
 }server_internal;
@@ -102,12 +104,13 @@ new_server_thread(void* args)
         }
         new_client._conn_sock = client_socket;
         address_init(&client_addr_imp, client_addr_str, client_addr.sin_port);
-        int err = c_vector_push(&sv_int->_connection_vec, &new_client);
-        if(err <0){
-            fprintf(stderr,"failed to save client_conn: erroro %d\n",err);
+        const void* ele = c_vector_push(&sv_int->_connection_vec, &new_client);
+        if(!ele){
+            fprintf(stderr,"failed to save client_conn\n");
             close(client_socket);
             continue;
         }
+        c_queue_push(&sv_int->_new_connection, &ele, sizeof(&ele));
     }
 
     sv_int->listening=0;
@@ -175,6 +178,7 @@ server_init(server** sv, const address* addr, const uint16_t sv_capacity)
     (*sv_int)->_common._my_socket=sv_socket;
     (*sv_int)->_connection_vec = vec_con;
     (*sv_int)->_sv_thread = 0;
+    (*sv_int)->_new_connection = NULL;
     
     return EXIT_SUCCESS;
 
