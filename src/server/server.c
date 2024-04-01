@@ -263,13 +263,6 @@ void server_wait(const server* sv)
     return;
 }
 
-
-uint8_t server_recv(const server* sv, void* buffer, uint16_t* buffer_size)
-{
-    NOT_IMPLEMENTED;
-    return EXIT_SUCCESS;
-}
-
 uint8_t server_free(server* sv)
 {
     server_internal* sv_int = CONCRETE_SERVER(sv);
