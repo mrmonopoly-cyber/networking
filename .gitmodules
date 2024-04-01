@@ -7,6 +7,3 @@
 [submodule "lib/c_vector"]
 	path = lib/c_vector
 	url = https://github.com/mrmonopoly-cyber/c_vector.git
-[submodule "lib/generic_tree_interface"]
-	path = lib/generic_tree_interface
-	url = https://github.com/mrmonopoly-cyber/generic_tree_interface.git
