@@ -2,7 +2,7 @@ C_FLAGS = -Wall -Wextra -g -fsanitize=address
 
 NETWORKING_ROOT := ..
 
-include ../Makefile
+include $(NETWORKING_ROOT)/Makefile
 
 obj_file = main.c address.o server.o client.o net_node.o c_vector.o rbt.o tree_operations.o
 
