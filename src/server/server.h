@@ -17,3 +17,4 @@ uint64_t server_sizeof();
 const char* server_addr_str(const server* sv);
 void server_to_string(const server* sv);
 const c_vector* server_get_client_list(const server* sv);
+const address* server_async_wait_new_connection(const server* sv);

@@ -14,14 +14,11 @@
 
 #include "../common/net_node.h"
 #include "../../lib/c_vector/c_vector.h"
-#include "../../lib/generic_tree_interface/src/rbt/rbt.h"
 
 typedef struct server_internal{
     net_node _common;
     c_vector* _connection_vec;
     pthread_t _sv_thread;
-    rbt* _connection_queue;
-    tree_operations* _queue_env;
     unsigned char listening:1;
 }server_internal;
 
@@ -108,8 +105,6 @@ new_server_thread(void* args)
             close(client_socket);
             continue;
         }
-
-        RBT_insert(&sv_int->_connection_queue, &client_socket, sv_int->_queue_env)
     }
 
     sv_int->listening=0;
@@ -173,12 +168,10 @@ server_init(server** sv, const address* addr, const uint16_t sv_capacity)
     }
 
 
-    (*sv_int)->_queue_env = RBT_environment(cmp_socket, NULL, NULL, NULL);
     (*sv_int)->_sv_thread=0;
     (*sv_int)->_common._my_socket=sv_socket;
     (*sv_int)->_connection_vec = vec_con;
     (*sv_int)->_sv_thread = 0;
-    (*sv_int)->_connection_queue = NULL;
     
     return EXIT_SUCCESS;
 
