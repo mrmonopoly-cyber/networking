@@ -13,7 +13,8 @@ check_null_pointer(const void* ptr, const char* ptr_name){
     return EXIT_SUCCESS;
 }
 
-static int net_cmp(const void* net1, const void* net2){
+static int 
+net_cmp(const void* net1, const void* net2){
     const net_node* net_1_t = (net_node*) net1;
     const net_node* net_2_t = (net_node*) net2;
 
@@ -22,11 +23,14 @@ static int net_cmp(const void* net1, const void* net2){
         net_1_t->_my_socket == net_2_t->_my_socket;
 }
 
-static void free_net(void* e){}
+static void 
+free_net(void* e){}
 
-static void print_net(const void* e) {}
+static void 
+print_net(const void* e) {}
 
-c_vector* net_node_vector_init(const unsigned int capacity)
+c_vector* 
+net_node_vector_init(const unsigned int capacity)
 {
     struct c_vector_input_init in_args ={
         .capacity = capacity,
@@ -41,13 +45,29 @@ c_vector* net_node_vector_init(const unsigned int capacity)
     
 }
 
-uint8_t net_node_send(const net_node* client, const void* data, const uint16_t data_amount)
+uint8_t 
+net_node_send(const net_node* node, const void* data, const uint16_t data_amount)
 {
-    if(check_null_pointer(client, "client connection")) return EXIT_FAILURE;
+    if(check_null_pointer(node, "node connection")) return EXIT_FAILURE;
     if(check_null_pointer(data, "data buffer")) return EXIT_FAILURE;
     if(!data_amount) return EXIT_SUCCESS;
     
-    send(client->_my_socket, data, data_amount, 0);
+    send(node->_my_socket, data, data_amount, 0);
+
+    return EXIT_SUCCESS;
+}
+
+int 
+net_node_recv(const net_node* node, void* buffer, unsigned int buffer_size)
+{
+    if(check_null_pointer(node, "node connection")) return EXIT_FAILURE;
+    if(check_null_pointer(buffer, "buffer connection")) return EXIT_FAILURE;
+    if(!buffer_size){
+        fprintf(stderr, "ERROR: buffer dimension not sufficient, must be >0\n");
+        return EXIT_FAILURE;
+    }
+
+    recv(node->_my_socket, buffer, buffer_size, 0);
 
     return EXIT_SUCCESS;
 }
