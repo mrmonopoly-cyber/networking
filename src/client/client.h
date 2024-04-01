@@ -4,4 +4,3 @@ typedef struct server client;
 
 int client_init(client** sv, const address* addr);
 int client_free(client* sv);
-int client_recv(const client* sv, void* buffer, unsigned int* buffer_size);
