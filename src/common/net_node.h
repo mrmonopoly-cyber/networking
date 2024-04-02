@@ -27,4 +27,4 @@ int address_init(address** addr, const char* ip_addr, const unsigned short port)
 //net_node
 c_vector* net_node_vector_init(const unsigned int capacity);
 uint8_t net_node_send(const net_node* node, const void* data, const uint16_t data_amount);
-int net_node_recv(const net_node* node, void* buffer, unsigned int buffer_size);
+int net_node_recv(const net_node* node, char** buffer, unsigned int buffer_size);

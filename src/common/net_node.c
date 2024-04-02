@@ -1,4 +1,5 @@
 #include "net_node.h"
+#include <stdint.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,28 +53,36 @@ net_node_send(const net_node* node, const void* data, const uint16_t data_amount
     if(check_null_pointer(data, "data buffer")) return EXIT_FAILURE;
     if(!data_amount) return EXIT_SUCCESS;
     
-    char terminator = '\n';
 
+    send(node->_my_socket, &data_amount, sizeof(data_amount), 0);
     send(node->_my_socket, data, data_amount, 0);
-    send(node->_my_socket, &terminator, sizeof(terminator), 0);
     
 
     return EXIT_SUCCESS;
 }
 
 int 
-net_node_recv(const net_node* node, void* buffer, unsigned int buffer_size)
+net_node_recv(const net_node* node, char** buffer, unsigned int buffer_size)
 {
     if(check_null_pointer(node, "node connection")) return EXIT_FAILURE;
     if(check_null_pointer(buffer, "buffer connection")) return EXIT_FAILURE;
-    if(!buffer_size){
-        fprintf(stderr, "ERROR: buffer dimension not sufficient, must be >0\n");
-        return EXIT_FAILURE;
-    }
-    char terminator = ' ';
     
-    recv(node->_my_socket, buffer, buffer_size, 0);
-    recv(node->_my_socket, &terminator, sizeof(terminator), 0);
+    uint16_t data_amount = -1;
+
+    printf("receiving data amount\n");
+    recv(node->_my_socket, &data_amount, sizeof(data_amount), 0);
+
+    if (!(*buffer)) {
+        printf("new buffer\n");
+        *buffer = calloc(data_amount+1, sizeof(**buffer));
+    }else if (data_amount > buffer_size) {
+        printf("reallocin buffer\n");
+        *buffer = realloc(*buffer, data_amount);
+        if (check_null_pointer(*buffer, "resize of buffer\n")) return EXIT_FAILURE;
+    }
+
+    printf("saving data\n");
+    recv(node->_my_socket, *buffer, data_amount, 0);
 
     return EXIT_SUCCESS;
 }
