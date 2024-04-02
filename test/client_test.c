@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "../networking.h"
 
@@ -13,7 +14,7 @@ int main(void)
     client_init(&client, addr_sv_ptr);
 
     char mex[1024] = "Hello\n";
-    net_node_send(client, &mex, sizeof(mex));
+    net_node_send(client, &mex, strlen(mex));
     while (1) {}
     return EXIT_SUCCESS;
 }

@@ -1,8 +1,10 @@
 #include "../networking.h"
 #include <assert.h>
 #include <pthread.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 void*
 input_manager(void* args){
@@ -12,12 +14,13 @@ input_manager(void* args){
     char buffer[2] = {};
     printf("press any key to close the server\n");
 
-    char mex[] = "hello\n";
-    char mex_recv[1024] = {0};
+    // char mex[] = "hello\n";
+    // char* mex_recv = calloc(1024, 1);
+    char* mex_recv = NULL;
     new_client = server_async_wait_new_connection(sv);
     printf("ip of new client %s\n", new_client->_addr._addr_str);
     // net_node_send(new_client, &mex, sizeof(mex));
-    net_node_recv(new_client, &mex_recv, sizeof(mex_recv));
+    net_node_recv(new_client, &mex_recv, 1024);
     printf("received message :%s\n", mex_recv);
     while (1) {
         fgets(buffer, sizeof(buffer), stdin);
@@ -28,6 +31,8 @@ input_manager(void* args){
             break;
         }
     }
+
+    free(mex_recv);
 
     return NULL;
 }
