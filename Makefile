@@ -13,6 +13,12 @@ C_QUEUE_ROOT := $(networking_src_path)/lib/c_queue
 include $(C_QUEUE_ROOT)/Makefile
 endif
 
+ifndef C_CHECK_INPUT_ROOT 
+C_CHECK_INPUT_ROOT := $(networking_src_path)/lib/c_queue
+include $(C_CHECK_INPUT_ROOT)/Makefile
+endif
+
+
 server.c = $(networking_src_path)/src/server/server.c
 client.c = $(networking_src_path)/src/client/client.c
 address.c = $(networking_src_path)/src/common/address.c
