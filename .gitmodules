@@ -10,3 +10,6 @@
 [submodule "lib/c_queue"]
 	path = lib/c_queue
 	url = https://github.com/mrmonopoly-cyber/c_queue.git
+[submodule "lib/c_input_check"]
+	path = lib/c_input_check
+	url = https://github.com/mrmonopoly-cyber/c_input_check.git

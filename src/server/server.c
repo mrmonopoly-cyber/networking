@@ -129,6 +129,9 @@ close_client_connection(void *ele)
 uint8_t 
 server_init(server** sv, const address* addr, const uint16_t sv_capacity)
 {
+    if(check_null_pointer(sv, "root pointer of server")) goto exit;
+    if(check_null_pointer(addr, "server addr")) goto exit;
+
     server_internal** sv_int = (server_internal** )sv;
     unsigned int alloc = 0;
     const char* ip_addr_str = addr->_addr_str;
@@ -140,9 +143,6 @@ server_init(server** sv, const address* addr, const uint16_t sv_capacity)
         .print_fun = print_fun,
     };
 
-    if(check_null_pointer(sv, "root pointer of server")){
-        goto exit;
-    }
     if (!*sv) {
         *sv = calloc(1, sizeof(**sv_int));
         if (check_null_pointer(*sv, "ptr alloc")) {
