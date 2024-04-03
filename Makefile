@@ -2,12 +2,16 @@ C_FLAGS = -Wall -Wextra -g -fsanitize=address
 
 networking_src_path := $(or $(NETWORKING_ROOT), .)
 
+
+ifndef C_VECTOR_ROOT 
 C_VECTOR_ROOT := $(networking_src_path)/lib/c_vector
-C_QUEUE_ROOT := $(networking_src_path)/lib/c_queue
-
-
 include $(C_VECTOR_ROOT)/Makefile
+endif
+
+ifndef C_QUEUE_ROOT 
+C_QUEUE_ROOT := $(networking_src_path)/lib/c_queue
 include $(C_QUEUE_ROOT)/Makefile
+endif
 
 server.c = $(networking_src_path)/src/server/server.c
 client.c = $(networking_src_path)/src/client/client.c
