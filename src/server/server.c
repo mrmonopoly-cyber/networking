@@ -15,6 +15,7 @@
 #include "../common/net_node.h"
 #include "../../lib/c_vector/c_vector.h"
 #include "../../lib/c_queue/c_queue.h"
+#include "../../lib/c_input_check/c_check_input.h"
 
 #define CONCRETE_SERVER(SV) (server_internal* ) SV
 #define NOT_IMPLEMENTED perror("not implemented")
@@ -32,15 +33,6 @@ typedef struct connection{
     socket_t _conn_sock;
     pthread_t _thr;
 }connection;
-
-static inline int
-check_null_pointer(const void* ptr, const char* ptr_name){
-    if (!ptr) {
-        fprintf(stderr, "ERROR: NULL pointer: %s\n",ptr_name);
-        return EXIT_FAILURE;
-    }
-    return EXIT_SUCCESS;
-}
 
 static inline void
 free_connection(void* conn){
@@ -119,7 +111,7 @@ new_server_thread(void* args)
 static void 
 close_client_connection(void *ele)
 {
-    if(check_null_pointer(ele, "connection")) return;
+    if(!c_check_input_pointer(ele, "connection")) return;
     connection* c = (connection* ) ele;
     close(c->_conn_sock);
 }
@@ -129,11 +121,10 @@ close_client_connection(void *ele)
 uint8_t 
 server_init(server** sv, const address* addr, const uint16_t sv_capacity)
 {
-    if(check_null_pointer(sv, "root pointer of server")) goto exit;
-    if(check_null_pointer(addr, "server addr")) goto exit;
+    if(!c_check_input_pointer(sv, "root pointer of server")) goto exit;
+    if(!c_check_input_pointer(addr, "server addr")) goto exit;
 
     server_internal** sv_int = (server_internal** )sv;
-    unsigned int alloc = 0;
     const char* ip_addr_str = addr->_addr_str;
     struct c_vector_input_init in_args ={
         .capacity = sv_capacity,
@@ -143,18 +134,10 @@ server_init(server** sv, const address* addr, const uint16_t sv_capacity)
         .print_fun = print_fun,
     };
 
-    if (!*sv) {
-        *sv = calloc(1, sizeof(**sv_int));
-        if (check_null_pointer(*sv, "ptr alloc")) {
-            goto exit;
-        }
-        alloc=1;
-    }
-    memcpy(&(*sv_int)->_common._addr, addr, sizeof(*addr));
     const socket_t sv_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (sv_socket < 0) {
         fprintf(stderr, "ERROR: failing creation of socket\n");
-        goto free_mem;
+        goto exit;
     }
     
     const struct sockaddr_in sv_struct = {
@@ -168,10 +151,15 @@ server_init(server** sv, const address* addr, const uint16_t sv_capacity)
     }
 
     c_vector* vec_con = c_vector_init(&in_args);
-    if(check_null_pointer(vec_con,"vector of connections")){
+    if(!c_check_input_pointer(vec_con,"vector of connections")){
         goto close_socket;
     }
 
+    if (!*sv_int) {
+        *sv_int = calloc(1, sizeof(**sv_int));
+        if (!c_check_input_pointer(*sv, "ptr alloc")) goto exit;
+    }
+    memcpy(&(*sv_int)->_common._addr, addr, sizeof(*addr));
 
     (*sv_int)->_sv_thread=0;
     (*sv_int)->_common._my_socket=sv_socket;
@@ -183,17 +171,14 @@ server_init(server** sv, const address* addr, const uint16_t sv_capacity)
 
 close_socket:
     close(sv_socket);
-free_mem:
-    if (alloc) {
-        free(*sv);
-        *sv = NULL;
-    }
 exit:
     return EXIT_FAILURE;
 }
 
 uint8_t server_start(server* sv)
 {
+    if(!c_check_input_pointer(sv, "server pointer")) return EXIT_FAILURE;
+
     server_internal* sv_int = CONCRETE_SERVER(sv);
     pthread_attr_t t_args;
     if (!sv_int->_sv_thread) {
@@ -215,6 +200,8 @@ uint8_t server_start(server* sv)
 
 uint8_t server_stop(const server* sv)
 {
+    if(!c_check_input_pointer(sv, "server pointer")) return EXIT_FAILURE;
+
     server_internal* sv_int = CONCRETE_SERVER(sv);
     if (!sv_int->_sv_thread) {
         fprintf(stderr, "ERROR: failed to stop the server, server has not yet started\n");
@@ -226,8 +213,8 @@ uint8_t server_stop(const server* sv)
 
 uint8_t server_kill(const server* sv)
 {
+    if(!c_check_input_pointer(sv, "server pointer")) return EXIT_FAILURE;
     server_internal* sv_int = CONCRETE_SERVER(sv);
-    if(check_null_pointer(sv_int, "server")) return EXIT_FAILURE;
     
     if (!sv_int->_sv_thread) {
         fprintf(stderr, "ERROR: server not yet stared, cannot kill it\n");
@@ -251,7 +238,7 @@ uint8_t server_kill(const server* sv)
 
 void server_wait(const server* sv)
 {
-    if(check_null_pointer(sv, "server")) return;
+    if(!c_check_input_pointer(sv, "server pointer")) return;
     
     server_internal* sv_int = CONCRETE_SERVER(sv);
     if (!sv_int->_sv_thread) {
@@ -265,6 +252,8 @@ void server_wait(const server* sv)
 
 uint8_t server_free(server* sv)
 {
+    if(!c_check_input_pointer(sv, "server pointer")) return EXIT_FAILURE;
+
     server_internal* sv_int = CONCRETE_SERVER(sv);
     server_stop(sv);
     c_vector_free(sv_int->_connection_vec);
@@ -278,7 +267,7 @@ unsigned long server_sizeof(){
 }
 
 const char* server_addr_str(const server* sv){
-    if(check_null_pointer(sv, "server")){
+    if(!c_check_input_pointer(sv, "server pointer")){
         return NULL;
     }
     server_internal* sv_int = CONCRETE_SERVER(sv);
@@ -287,6 +276,8 @@ const char* server_addr_str(const server* sv){
 
 void server_to_string(const server* sv)
 {
+    if(!c_check_input_pointer(sv, "server pointer")) return ;
+
     server_internal* sv_int = CONCRETE_SERVER(sv);
     printf("common:\n");
     printf("socket: %d, address: %s\n",sv_int->_common._my_socket, sv_int->_common._addr._addr_str);
@@ -302,7 +293,7 @@ void server_to_string(const server* sv)
 
 const c_vector* server_get_client_list(const server* sv)
 {
-    if(check_null_pointer(sv, "server"))return NULL;
+    if(!c_check_input_pointer(sv, "server pointer")) return NULL;
 
     server_internal* sv_int = CONCRETE_SERVER(sv);
     unsigned int clien_num = c_vector_length(sv_int->_connection_vec);
@@ -319,6 +310,8 @@ const c_vector* server_get_client_list(const server* sv)
 
 const net_node* server_async_wait_new_connection(const server* sv)
 {
+    if(!c_check_input_pointer(sv, "server pointer")) return NULL;
+
     server_internal* sv_int = CONCRETE_SERVER(sv);
     void* res = NULL;
 

@@ -4,7 +4,7 @@ NETWORKING_ROOT := ..
 
 include $(NETWORKING_ROOT)/Makefile
 
-obj_file = address.o server.o client.o net_node.o c_vector.o c_queue.o
+obj_file = address.o server.o client.o net_node.o c_vector.o c_queue.o c_check_input.o
 
 all: server client
 

@@ -5,14 +5,7 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 
-static inline int
-check_null_pointer(const void* ptr, const char* ptr_name){
-    if (!ptr) {
-        fprintf(stderr, "ERROR: NULL pointer: %s\n",ptr_name);
-        return EXIT_FAILURE;
-    }
-    return EXIT_SUCCESS;
-}
+#include "../../lib/c_input_check/c_check_input.h"
 
 static int 
 net_cmp(const void* net1, const void* net2){
@@ -49,8 +42,8 @@ net_node_vector_init(const unsigned int capacity)
 uint8_t 
 net_node_send(const net_node* node, const void* data, const uint16_t data_amount)
 {
-    if(check_null_pointer(node, "node connection")) return EXIT_FAILURE;
-    if(check_null_pointer(data, "data buffer")) return EXIT_FAILURE;
+    if(!c_check_input_pointer(node, "node connection")) return EXIT_FAILURE;
+    if(!c_check_input_pointer(data, "data buffer")) return EXIT_FAILURE;
     if(!data_amount) return EXIT_SUCCESS;
     
 
@@ -64,8 +57,9 @@ net_node_send(const net_node* node, const void* data, const uint16_t data_amount
 int 
 net_node_recv(const net_node* node, char** buffer, unsigned int buffer_size)
 {
-    if(check_null_pointer(node, "node connection")) return EXIT_FAILURE;
-    if(check_null_pointer(buffer, "buffer connection")) return EXIT_FAILURE;
+
+    if(!c_check_input_pointer(node, "node connection")) return EXIT_FAILURE;
+    if(!c_check_input_pointer(buffer, "data root buffer")) return EXIT_FAILURE;
     
     uint16_t data_amount = -1;
 
@@ -78,7 +72,7 @@ net_node_recv(const net_node* node, char** buffer, unsigned int buffer_size)
     }else if (data_amount > buffer_size) {
         printf("reallocin buffer\n");
         *buffer = realloc(*buffer, data_amount);
-        if (check_null_pointer(*buffer, "resize of buffer\n")) return EXIT_FAILURE;
+        if(!c_check_input_pointer(*buffer, "reseize of buffer")) return EXIT_FAILURE;
     }
 
     printf("saving data\n");
