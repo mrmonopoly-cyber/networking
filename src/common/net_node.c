@@ -46,10 +46,13 @@ net_node_send(const net_node* node, const void* data, const uint16_t data_amount
     if(!c_check_input_pointer(data, "data buffer")) return EXIT_FAILURE;
     if(!data_amount) return EXIT_SUCCESS;
     
-
-    send(node->_my_socket, &data_amount, sizeof(data_amount), 0);
-    send(node->_my_socket, data, data_amount, 0);
+    uint64_t size_data_amount = sizeof(data_amount);
+    uint8_t mex_ser[data_amount + size_data_amount];
     
+    memcpy(mex_ser, &data_amount, size_data_amount);
+    memcpy(mex_ser + size_data_amount, data, data_amount);
+
+    send(node->_my_socket, &mex_ser, sizeof(mex_ser), 0);
 
     return EXIT_SUCCESS;
 }
@@ -61,7 +64,7 @@ net_node_recv(const net_node* node, char** buffer, unsigned int buffer_size)
     if(!c_check_input_pointer(node, "node connection")) return EXIT_FAILURE;
     if(!c_check_input_pointer(buffer, "data root buffer")) return EXIT_FAILURE;
     
-    uint16_t data_amount = -1;
+    uint16_t data_amount = 0;
 
     printf("receiving data amount\n");
     recv(node->_my_socket, &data_amount, sizeof(data_amount), 0);
