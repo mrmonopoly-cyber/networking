@@ -1,12 +1,11 @@
 #include "../networking.h"
 #include <assert.h>
 #include <pthread.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-void new_c_fun(net_node* client)
+void new_c_fun(net_node* client, void* args)
 {
     printf("new client is: %s\n", client->_addr._addr_str);
 }
@@ -67,7 +66,7 @@ int main()
     server_to_string(new_server);
     // printf("ip addr from struct: %s\n", server_addr_str(new_server));
 
-    server_set_async_new_client_action(new_server, new_c_fun);
+    server_set_async_new_client_action(new_server, new_c_fun, NULL);
     pthread_t p;
     pthread_attr_t inf;
     pthread_attr_init(&inf);

@@ -33,6 +33,7 @@ typedef struct server_internal{
     c_vector* _connection_vec;
     c_queue* _new_connection;
     new_client_fun _new_c_fun;
+    void* new_client_fun_context;
     pthread_t _sv_thread;
     unsigned char listening:1;
 }server_internal;
@@ -73,7 +74,7 @@ static void handler_new_client(int sig, siginfo_t *info, void* context)
     if (sv_int->_new_c_fun) {
         void* new_c = NULL;
         c_queue_pop(&sv_int->_new_connection,&new_c);
-        sv_int->_new_c_fun(new_c);
+        sv_int->_new_c_fun(new_c, sv_int->new_client_fun_context);
     }   
 }
 
@@ -337,13 +338,14 @@ const c_vector* server_get_client_list(const server* sv)
     return result;
 }
 
-uint8_t server_set_async_new_client_action(const server* sv,new_client_fun new_c_fun)
+uint8_t server_set_async_new_client_action(const server* sv,new_client_fun new_c_fun, void* context)
 {
     if((!c_check_input_pointer(sv, "server pointer")) || 
             (!c_check_input_pointer(new_c_fun, "new client function"))) return EXIT_FAILURE;
 
     server_internal* sv_int = CONCRETE_SERVER(sv);
     sv_int->_new_c_fun = new_c_fun;
+    sv_int->new_client_fun_context = context;
 
     return EXIT_SUCCESS;
 }
