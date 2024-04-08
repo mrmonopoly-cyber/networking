@@ -6,6 +6,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+void new_c_fun(net_node* client)
+{
+    printf("new client is: %s\n", client->_addr._addr_str);
+}
+
 void*
 input_manager(void* args){
     server* sv = (server* ) args;
@@ -17,11 +22,7 @@ input_manager(void* args){
     // char mex[] = "hello\n";
     // char* mex_recv = calloc(1024, 1);
     char* mex_recv = NULL;
-    new_client = server_async_wait_new_connection(sv);
-    printf("ip of new client %s\n", new_client->_addr._addr_str);
-    // net_node_send(new_client, &mex, sizeof(mex));
-    net_node_recv(new_client, &mex_recv, 1024);
-    printf("received message :%s\n", mex_recv);
+    
     while (1) {
         fgets(buffer, sizeof(buffer), stdin);
         fflush(stdin);
@@ -66,6 +67,7 @@ int main()
     server_to_string(new_server);
     // printf("ip addr from struct: %s\n", server_addr_str(new_server));
 
+    server_set_async_new_client_action(new_server, new_c_fun);
     pthread_t p;
     pthread_attr_t inf;
     pthread_attr_init(&inf);

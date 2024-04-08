@@ -1,5 +1,7 @@
 #include "server.h"
 
+#include <bits/types/__sigval_t.h>
+#include <bits/types/siginfo_t.h>
 #include <pthread.h>
 #include <signal.h>
 #include <netinet/in.h>
@@ -20,19 +22,21 @@
 #define CONCRETE_SERVER(SV) (server_internal* ) SV
 #define NOT_IMPLEMENTED perror("not implemented")
 
-typedef struct server_internal{
-    net_node _common;
-    c_vector* _connection_vec;
-    c_queue* _new_connection;
-    pthread_t _sv_thread;
-    unsigned char listening:1;
-}server_internal;
-
 typedef struct connection{
     address _conn_addr;
     socket_t _conn_sock;
     pthread_t _thr;
 }connection;
+
+typedef struct server_internal{
+    net_node _common;
+    c_vector* _connection_vec;
+    c_queue* _new_connection;
+    new_client_fun _new_c_fun;
+    pthread_t _sv_thread;
+    unsigned char listening:1;
+}server_internal;
+
 
 static inline void
 free_connection(void* conn){
@@ -62,6 +66,17 @@ print_fun(const void* e){
     printf("%s", ser->_common._addr._addr_str);
 }
 
+//private tool function
+static void handler_new_client(int sig, siginfo_t *info, void* context)
+{
+    server_internal* sv_int = CONCRETE_SERVER(info);
+    if (sv_int->_new_c_fun) {
+        void* new_c = NULL;
+        c_queue_pop(&sv_int->_new_connection,&new_c);
+        sv_int->_new_c_fun(new_c);
+    }   
+}
+
 static void* 
 new_server_thread(void* args)
 {
@@ -76,10 +91,13 @@ new_server_thread(void* args)
         ._conn_sock = -1,
     };
     address* client_addr_imp = &new_client._conn_addr;
+    const union sigval sv = {
+        .sival_ptr = &sv_int,
+    };
 
     listen(_my_socket, c_vector_capacity(sv_int->_connection_vec));
-
     sv_int->listening=1;
+
     while (sv_int->listening) {
         printf("waiting for connections\n");
         client_socket = accept(_my_socket,(struct sockaddr*) &client_addr, &client_addr_size);
@@ -102,6 +120,7 @@ new_server_thread(void* args)
             continue;
         }
         c_queue_push(&sv_int->_new_connection, ele, c_vector_ele_size(sv_int->_connection_vec));
+        sigqueue(getpid(), SIGUSR1, sv);
     }
 
     sv_int->listening=0;
@@ -150,14 +169,18 @@ server_init(server** sv, const address* addr, const uint16_t sv_capacity)
         goto close_socket;
     }
 
+    struct sigaction sg;
+    sg.sa_sigaction = handler_new_client;
+    sg.sa_flags = SA_SIGINFO;
+    sigemptyset(&sg.sa_mask);
+    if(sigaction(SIGUSR1, &sg, NULL)) goto close_socket;
+
     c_vector* vec_con = c_vector_init(&in_args);
-    if(!c_check_input_pointer(vec_con,"vector of connections")){
-        goto close_socket;
-    }
+    if(!c_check_input_pointer(vec_con,"vector of connections")) goto clean_vector;
 
     if (!*sv_int) {
         *sv_int = calloc(1, sizeof(**sv_int));
-        if (!c_check_input_pointer(*sv, "ptr alloc")) goto exit;
+        if (!c_check_input_pointer(*sv, "ptr alloc")) goto restore_signal;
     }
     memcpy(&(*sv_int)->_common._addr, addr, sizeof(*addr));
 
@@ -166,9 +189,15 @@ server_init(server** sv, const address* addr, const uint16_t sv_capacity)
     (*sv_int)->_connection_vec = vec_con;
     (*sv_int)->_sv_thread = 0;
     (*sv_int)->_new_connection = NULL;
+    (*sv_int)->_new_c_fun = NULL;
+
     
     return EXIT_SUCCESS;
 
+clean_vector:
+    c_vector_free(vec_con);
+restore_signal:
+    if(!sigaction(SIGUSR1, NULL, NULL)) goto close_socket;
 close_socket:
     close(sv_socket);
 exit:
@@ -308,18 +337,13 @@ const c_vector* server_get_client_list(const server* sv)
     return result;
 }
 
-const net_node* server_async_wait_new_connection(const server* sv)
+uint8_t server_set_async_new_client_action(const server* sv,new_client_fun new_c_fun)
 {
-    if(!c_check_input_pointer(sv, "server pointer")) return NULL;
+    if((!c_check_input_pointer(sv, "server pointer")) || 
+            (!c_check_input_pointer(new_c_fun, "new client function"))) return EXIT_FAILURE;
 
     server_internal* sv_int = CONCRETE_SERVER(sv);
-    void* res = NULL;
+    sv_int->_new_c_fun = new_c_fun;
 
-    fprintf(stderr, "This is temporal, right now it's not async it's a polling\n");
-    for (;c_queue_is_empty(sv_int->_new_connection);) {
-    
-    }
-
-    c_queue_pop(&sv_int->_new_connection, &res);
-    return res;
+    return EXIT_SUCCESS;
 }
